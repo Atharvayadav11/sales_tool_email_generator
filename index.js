@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Gemini API configuration
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBo5DCCK5g4P9wBWFsSDDCRrN8tZoWdeaA';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY ;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Middleware
