@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follow-Up Email Timing Optimizer</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .timing-optimizer-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #2193b0, #6dd5ed);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(33, 147, 176, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2193b0;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F552";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .timing-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2193b0;
+        }
+        .timing-card h3 {
+            color: #2193b0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .timing-details {
+            margin: 15px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .benchmark-data {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95em;
+        }
+        .benchmark-data h4 {
+            color: #2193b0;
+            margin-bottom: 10px;
+        }
+        .benchmark-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .benchmark-list li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .benchmark-list li::before {
+            content: "📊";
+            position: absolute;
+            left: 0;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading::after {
+            content: "⏳";
+            animation: loading 1s infinite;
+        }
+        @keyframes loading {
+            0% { content: "⏳"; }
+            33% { content: "⌛"; }
+            66% { content: "⏳"; }
+        }
+        @media (max-width: 768px) {
+            .timing-optimizer-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="timing-optimizer-container">
+        <div class="header">
+            <h1>⏰ Follow-Up Timing Optimizer</h1>
+            <p>Get data-driven recommendations for your follow-up timing.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="industry">🏢 Industry</label>
+            <select id="industry" class="input-select">
+                <option value="">Select Industry</option>
+                <option value="technology">Technology/SaaS</option>
+                <option value="finance">Finance/Banking</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="retail">Retail/E-commerce</option>
+                <option value="manufacturing">Manufacturing</option>
+                <option value="professional">Professional Services</option>
+                <option value="education">Education</option>
+                <option value="real-estate">Real Estate</option>
+            </select>
+            
+            <label class="input-label" for="leadLocation">🌍 Lead Location/Timezone (optional)</label>
+            <select id="leadLocation" class="input-select">
+                <option value="">Select Timezone</option>
+                <option value="PST">Pacific Time (PST)</option>
+                <option value="MST">Mountain Time (MST)</option>
+                <option value="CST">Central Time (CST)</option>
+                <option value="EST">Eastern Time (EST)</option>
+                <option value="GMT">GMT/UTC</option>
+                <option value="CET">Central European (CET)</option>
+                <option value="IST">India (IST)</option>
+                <option value="AEST">Australia Eastern (AEST)</option>
+            </select>
+            
+            <label class="input-label" for="previousEmailTime">📅 Previous Email Send Time (optional)</label>
+            <input type="datetime-local" id="previousEmailTime" class="input-field" />
+            
+            <label class="input-label" for="productService">🛍️ Product/Service (optional)</label>
+            <input id="productService" class="input-field" placeholder="E.g., CRM Software, Consulting Services" />
+        </div>
+        <button id="generateBtn" class="generate-btn">
+            <span id="buttonText">🔍 Get Timing Recommendations</span>
+        </button>
+        <div id="loading" class="loading">Analyzing timing data...</div>
+        <div class="result-section" id="resultSection">
+            <div class="result-header">Recommended Follow-Up Timing</div>
+            <div id="timingResults"></div>
+        </div>
+    </div>
+    <script>
+        class FollowUpTimingOptimizer {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.industryBenchmarks = {
+                    'technology': {
+                        bestDays: ['Tuesday', 'Wednesday', 'Thursday'],
+                        bestTimes: ['10:00 AM', '2:00 PM', '4:00 PM'],
+                        responseRate: '23%',
+                        followUpWindow: '24-48 hours'
+                    },
+                    'finance': {
+                        bestDays: ['Tuesday', 'Wednesday'],
+                        bestTimes: ['9:00 AM', '11:00 AM', '3:00 PM'],
+                        responseRate: '21%',
+                        followUpWindow: '24-72 hours'
+                    },
+                    'healthcare': {
+                        bestDays: ['Wednesday', 'Thursday'],
+                        bestTimes: ['8:00 AM', '2:00 PM'],
+                        responseRate: '19%',
+                        followUpWindow: '48-72 hours'
+                    },
+                    'retail': {
+                        bestDays: ['Tuesday', 'Thursday'],
+                        bestTimes: ['10:00 AM', '2:00 PM', '5:00 PM'],
+                        responseRate: '22%',
+                        followUpWindow: '24-48 hours'
+                    },
+                    'manufacturing': {
+                        bestDays: ['Tuesday', 'Wednesday'],
+                        bestTimes: ['9:00 AM', '1:00 PM'],
+                        responseRate: '18%',
+                        followUpWindow: '48-72 hours'
+                    },
+                    'professional': {
+                        bestDays: ['Tuesday', 'Wednesday', 'Thursday'],
+                        bestTimes: ['9:00 AM', '11:00 AM', '3:00 PM'],
+                        responseRate: '24%',
+                        followUpWindow: '24-48 hours'
+                    },
+                    'education': {
+                        bestDays: ['Wednesday', 'Thursday'],
+                        bestTimes: ['10:00 AM', '2:00 PM'],
+                        responseRate: '20%',
+                        followUpWindow: '48-72 hours'
+                    },
+                    'real-estate': {
+                        bestDays: ['Tuesday', 'Thursday'],
+                        bestTimes: ['9:00 AM', '11:00 AM', '3:00 PM'],
+                        responseRate: '21%',
+                        followUpWindow: '24-48 hours'
+                    }
+                };
+            }
+
+            initializeElements() {
+                this.industryInput = document.getElementById('industry');
+                this.leadLocationInput = document.getElementById('leadLocation');
+                this.previousEmailTimeInput = document.getElementById('previousEmailTime');
+                this.productServiceInput = document.getElementById('productService');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.buttonText = document.getElementById('buttonText');
+                this.loadingDiv = document.getElementById('loading');
+                this.resultSection = document.getElementById('resultSection');
+                this.timingResultsDiv = document.getElementById('timingResults');
+            }
+
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateRecommendations());
+            }
+
+            generateRecommendations() {
+                const industry = this.industryInput.value;
+                const leadLocation = this.leadLocationInput.value;
+                const previousEmailTime = this.previousEmailTimeInput.value;
+                const productService = this.productServiceInput.value.trim();
+
+                if (!industry) {
+                    this.showError('Please select an industry.');
+                    return;
+                }
+
+                const benchmarks = this.industryBenchmarks[industry];
+                if (!benchmarks) {
+                    this.showError('Industry data not available.');
+                    return;
+                }
+
+                let recommendedTimes = this.calculateRecommendedTimes(benchmarks, leadLocation, previousEmailTime);
+                this.displayResults(recommendedTimes, benchmarks, leadLocation);
+            }
+
+            calculateRecommendedTimes(benchmarks, timezone, previousEmailTime) {
+                let recommendations = [];
+                
+                // Get next occurrence of best days
+                const today = new Date();
+                const nextDays = benchmarks.bestDays.map(day => {
+                    const dayIndex = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+                        .indexOf(day);
+                    let nextDate = new Date(today);
+                    while (nextDate.getDay() !== dayIndex) {
+                        nextDate.setDate(nextDate.getDate() + 1);
+                    }
+                    return nextDate;
+                });
+
+                // For each day, add best times
+                nextDays.forEach(day => {
+                    benchmarks.bestTimes.forEach(time => {
+                        const [hours, minutes] = time.split(':');
+                        const dateTime = new Date(day);
+                        dateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                        
+                        // Skip times that have already passed today
+                        if (dateTime > today) {
+                            recommendations.push(dateTime);
+                        }
+                    });
+                });
+
+                // Sort by date/time
+                recommendations.sort((a, b) => a - b);
+
+                // Take only next 3 recommendations
+                return recommendations.slice(0, 3);
+            }
+
+            displayResults(recommendedTimes, benchmarks, timezone) {
+                const timeFormat = { 
+                    weekday: 'long', 
+                    hour: 'numeric', 
+                    minute: 'numeric', 
+                    hour12: true 
+                };
+
+                let html = `
+                    <div class="timing-card">
+                        <h3>📅 Next Best Send Times</h3>
+                        <div class="timing-details">
+                            ${recommendedTimes.map((time, index) => `
+                                <p style="margin-bottom: 10px;">
+                                    <strong>${index + 1}.</strong> 
+                                    ${time.toLocaleString('en-US', timeFormat)}
+                                    ${timezone ? ` (${timezone})` : ''}
+                                </p>
+                            `).join('')}
+                        </div>
+                        <div class="benchmark-data">
+                            <h4>Industry Benchmarks</h4>
+                            <ul class="benchmark-list">
+                                <li>Best days: ${benchmarks.bestDays.join(', ')}</li>
+                                <li>Best times: ${benchmarks.bestTimes.join(', ')}</li>
+                                <li>Average response rate: ${benchmarks.responseRate}</li>
+                                <li>Optimal follow-up window: ${benchmarks.followUpWindow}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timing-card">
+                        <h3>💡 Timing Tips</h3>
+                        <ul class="benchmark-list">
+                            <li>Send during recipient's working hours (9 AM - 5 PM their time)</li>
+                            <li>Avoid Mondays (too busy) and Fridays (weekend mindset)</li>
+                            <li>Mid-morning and mid-afternoon typically have higher engagement</li>
+                            <li>Consider scheduling follow-ups in advance to hit optimal times</li>
+                        </ul>
+                    </div>
+                `;
+
+                this.timingResultsDiv.innerHTML = html;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            showError(message) {
+                this.timingResultsDiv.innerHTML = `<div style="color: #dc3545; padding: 15px;">${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new FollowUpTimingOptimizer();
+        });
+    </script>
+</body>
+</html> 

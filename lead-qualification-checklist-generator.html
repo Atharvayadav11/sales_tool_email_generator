@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Qualification Checklist Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .checklist-generator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #4b6cb7, #182848);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(75, 108, 183, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #4b6cb7;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\2705";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .checklist-preview {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .checklist-item input[type="checkbox"] {
+            margin-right: 12px;
+            width: 18px;
+            height: 18px;
+        }
+        .score-input {
+            width: 60px;
+            padding: 5px;
+            margin-left: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .download-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #4b6cb7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover { background: #3f5ca0; }
+        .format-select {
+            margin-right: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .instructions {
+            margin-top: 18px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 0.95em;
+        }
+        @media (max-width: 768px) {
+            .checklist-generator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="checklist-generator-container">
+        <div class="header">
+            <h1>✅ Lead Qualification Checklist</h1>
+            <p>Generate a customized checklist to qualify your leads consistently.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="productService">🛍️ Product/Service</label>
+            <input id="productService" class="input-field" placeholder="E.g., Marketing Automation Software, HR Consulting" />
+            
+            <label class="input-label" for="targetMarket">🎯 ICP/Target Market</label>
+            <input id="targetMarket" class="input-field" placeholder="E.g., Mid-size B2B SaaS companies, Healthcare providers" />
+            
+            <label class="input-label" for="qualificationCriteria">📋 Key Qualification Criteria</label>
+            <textarea id="qualificationCriteria" class="input-textarea" placeholder="Enter one criterion per line. E.g.:&#10;Budget > $10k&#10;Decision maker role&#10;Timeline within 3 months&#10;Current solution pain points&#10;Team size > 50"></textarea>
+            
+            <label class="input-label" for="scoreType">📊 Scoring Type</label>
+            <select id="scoreType" class="input-select">
+                <option value="yesno">Yes/No Checklist</option>
+                <option value="score">Score-based (1-5)</option>
+            </select>
+        </div>
+        <button id="generateBtn" class="generate-btn">
+            <span id="buttonText">📝 Generate Checklist</span>
+        </button>
+        <div class="result-section" id="resultSection">
+            <div class="result-header">Lead Qualification Checklist</div>
+            <div id="checklistPreview" class="checklist-preview"></div>
+            <div style="margin-top: 20px;">
+                <select id="downloadFormat" class="format-select">
+                    <option value="csv">CSV (Excel)</option>
+                    <option value="notion">Notion Template</option>
+                </select>
+                <button id="downloadBtn" class="download-btn">⬇️ Download Template</button>
+            </div>
+            <div class="instructions" id="instructions"></div>
+        </div>
+    </div>
+    <script>
+        class LeadQualificationGenerator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.checklistItems = [];
+            }
+
+            initializeElements() {
+                this.productServiceInput = document.getElementById('productService');
+                this.targetMarketInput = document.getElementById('targetMarket');
+                this.criteriaInput = document.getElementById('qualificationCriteria');
+                this.scoreTypeInput = document.getElementById('scoreType');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.buttonText = document.getElementById('buttonText');
+                this.resultSection = document.getElementById('resultSection');
+                this.checklistPreview = document.getElementById('checklistPreview');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.downloadFormat = document.getElementById('downloadFormat');
+                this.instructionsDiv = document.getElementById('instructions');
+            }
+
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateChecklist());
+                this.downloadBtn.addEventListener('click', () => this.downloadTemplate());
+                this.scoreTypeInput.addEventListener('change', () => {
+                    if (this.checklistItems.length > 0) {
+                        this.generateChecklist();
+                    }
+                });
+            }
+
+            generateChecklist() {
+                const productService = this.productServiceInput.value.trim();
+                const targetMarket = this.targetMarketInput.value.trim();
+                const criteria = this.criteriaInput.value.trim();
+                const scoreType = this.scoreTypeInput.value;
+
+                if (!productService || !targetMarket || !criteria) {
+                    this.showError('Please fill in all required fields.');
+                    return;
+                }
+
+                // Parse criteria into array
+                this.checklistItems = criteria.split('\n')
+                    .map(item => item.trim())
+                    .filter(item => item.length > 0);
+
+                // Add default BANT criteria if not present
+                const bantCriteria = [
+                    'Has available Budget',
+                    'Has Authority to make decisions',
+                    'Has clear Need for our solution',
+                    'Has defined Timeline for purchase'
+                ];
+
+                bantCriteria.forEach(item => {
+                    if (!this.checklistItems.some(existing => 
+                        existing.toLowerCase().includes(item.toLowerCase().split(' ')[1]))) {
+                        this.checklistItems.push(item);
+                    }
+                });
+
+                // Generate preview
+                let html = `<div style="margin-bottom: 15px;">
+                    <strong>Product/Service:</strong> ${productService}<br>
+                    <strong>Target Market:</strong> ${targetMarket}
+                </div>`;
+
+                this.checklistItems.forEach((item, index) => {
+                    if (scoreType === 'yesno') {
+                        html += `
+                            <div class="checklist-item">
+                                <input type="checkbox" id="item${index}">
+                                <label for="item${index}">${item}</label>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="checklist-item">
+                                <label>${item}</label>
+                                <input type="number" class="score-input" min="1" max="5" placeholder="1-5">
+                            </div>
+                        `;
+                    }
+                });
+
+                // Add total score section for score-based checklist
+                if (scoreType === 'score') {
+                    const maxScore = this.checklistItems.length * 5;
+                    html += `
+                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
+                            <strong>Scoring Guide:</strong><br>
+                            1 = Does not meet criteria<br>
+                            3 = Partially meets criteria<br>
+                            5 = Fully meets criteria<br><br>
+                            Maximum possible score: ${maxScore} points<br>
+                            Recommended qualification threshold: ${Math.floor(maxScore * 0.7)} points
+                        </div>
+                    `;
+                }
+
+                this.checklistPreview.innerHTML = html;
+
+                // Show instructions
+                this.instructionsDiv.innerHTML = `
+                    <strong>How to use this checklist:</strong><br>
+                    1. Fill out one checklist per lead<br>
+                    2. ${scoreType === 'yesno' 
+                        ? 'Check all criteria that the lead meets'
+                        : 'Score each criterion from 1-5 based on how well the lead meets it'}<br>
+                    3. ${scoreType === 'yesno'
+                        ? 'Qualify leads that meet at least 70% of criteria'
+                        : 'Calculate total score and compare against the recommended threshold'}<br>
+                    4. Document any additional notes or context<br>
+                    5. Share completed checklist with AE during handoff
+                `;
+
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            downloadTemplate() {
+                const format = this.downloadFormat.value;
+                const productService = this.productServiceInput.value.trim();
+                const targetMarket = this.targetMarketInput.value.trim();
+                const scoreType = this.scoreTypeInput.value;
+
+                let content = '';
+                if (format === 'csv') {
+                    content = `Lead Qualification Checklist\n`;
+                    content += `Product/Service,${productService}\n`;
+                    content += `Target Market,${targetMarket}\n\n`;
+                    content += `Qualification Criteria,${scoreType === 'yesno' ? 'Meets Criteria (Yes/No)' : 'Score (1-5)'}\n`;
+                    this.checklistItems.forEach(item => {
+                        content += `${item},\n`;
+                    });
+                    if (scoreType === 'score') {
+                        content += `\nTotal Score,=SUM(B4:B${3 + this.checklistItems.length})\n`;
+                        content += `Maximum Possible Score,${this.checklistItems.length * 5}\n`;
+                        content += `Recommended Threshold,${Math.floor(this.checklistItems.length * 5 * 0.7)}\n`;
+                    }
+                } else {
+                    // Notion-friendly markdown format
+                    content = `# Lead Qualification Checklist\n\n`;
+                    content += `**Product/Service:** ${productService}\n`;
+                    content += `**Target Market:** ${targetMarket}\n\n`;
+                    content += `## Qualification Criteria\n\n`;
+                    this.checklistItems.forEach(item => {
+                        content += scoreType === 'yesno'
+                            ? `- [ ] ${item}\n`
+                            : `- ${item}: __/5\n`;
+                    });
+                    if (scoreType === 'score') {
+                        content += `\n## Scoring\n`;
+                        content += `- Maximum possible score: ${this.checklistItems.length * 5}\n`;
+                        content += `- Recommended threshold: ${Math.floor(this.checklistItems.length * 5 * 0.7)}\n`;
+                        content += `- Total score: __/${this.checklistItems.length * 5}\n`;
+                    }
+                }
+
+                const blob = new Blob([content], { 
+                    type: format === 'csv' ? 'text/csv' : 'text/markdown' 
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lead_qualification_checklist.${format === 'csv' ? 'csv' : 'md'}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            showError(message) {
+                this.checklistPreview.innerHTML = `<div style="color: #dc3545; padding: 15px;">${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new LeadQualificationGenerator();
+        });
+    </script>
+</body>
+</html> 

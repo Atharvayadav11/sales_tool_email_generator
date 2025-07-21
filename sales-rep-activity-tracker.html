@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Rep Activity Tracker Template</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .activity-tracker-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4C4";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .download-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover { background: #5a6fd8; }
+        .instructions {
+            margin-top: 18px;
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 1em;
+        }
+        @media (max-width: 768px) {
+            .activity-tracker-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="activity-tracker-container">
+        <div class="header">
+            <h1>📋 Sales Rep Activity Tracker Template</h1>
+            <p>Download a template to track daily or weekly sales activities.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="activityTypes">📝 Activity Types</label>
+            <textarea id="activityTypes" class="input-textarea" placeholder="E.g., Calls, Emails, Meetings, Demos"></textarea>
+            <label class="input-label" for="trackingPeriod">⏳ Tracking Period</label>
+            <select id="trackingPeriod" class="input-select">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+            </select>
+            <label class="input-label" for="repName">👤 Rep Name (optional)</label>
+            <input id="repName" class="input-field" placeholder="E.g., John Doe" />
+        </div>
+        <button id="generateTrackerBtn" class="generate-btn">
+            <span id="trackerButtonText">🧮 Generate Tracker</span>
+        </button>
+        <div class="result-section" id="trackerResultSection">
+            <div class="result-header">Activity Tracker Template</div>
+            <div id="trackerResults"></div>
+            <button id="downloadTrackerBtn" class="download-btn" style="display:none;">⬇️ Download CSV Template</button>
+            <div class="instructions" id="trackerInstructions" style="display:none;"></div>
+        </div>
+    </div>
+    <script>
+        class SalesRepActivityTracker {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.csvContent = '';
+            }
+            initializeElements() {
+                this.activityTypesInput = document.getElementById('activityTypes');
+                this.trackingPeriodInput = document.getElementById('trackingPeriod');
+                this.repNameInput = document.getElementById('repName');
+                this.generateBtn = document.getElementById('generateTrackerBtn');
+                this.buttonText = document.getElementById('trackerButtonText');
+                this.resultSection = document.getElementById('trackerResultSection');
+                this.resultsDiv = document.getElementById('trackerResults');
+                this.downloadBtn = document.getElementById('downloadTrackerBtn');
+                this.instructionsDiv = document.getElementById('trackerInstructions');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateTracker());
+                this.downloadBtn.addEventListener('click', () => this.downloadCsv());
+            }
+            generateTracker() {
+                const activityTypesRaw = this.activityTypesInput.value.trim();
+                const trackingPeriod = this.trackingPeriodInput.value;
+                const repName = this.repNameInput.value.trim();
+                if (!activityTypesRaw) {
+                    this.showError('Please enter activity types.');
+                    return;
+                }
+                this.hideError();
+                // Parse activity types
+                const activityTypes = activityTypesRaw.split(/,|\n/).map(a => a.trim()).filter(Boolean);
+                // Build CSV header
+                let csv = '';
+                if (repName) csv += `Rep Name: ${repName}\n`;
+                csv += `Tracking Period: ${trackingPeriod.charAt(0).toUpperCase() + trackingPeriod.slice(1)}\n\n`;
+                csv += 'Date,' + activityTypes.join(',') + ',Notes\n';
+                // Add sample rows
+                for (let i = 0; i < 5; i++) {
+                    csv += ','.repeat(activityTypes.length + 2) + '\n';
+                }
+                this.csvContent = csv;
+                // Show preview
+                let html = `<b>CSV Columns:</b> Date, ${activityTypes.join(', ')}, Notes`;
+                if (repName) html += `<br><b>Rep Name:</b> ${repName}`;
+                html += `<br><b>Tracking Period:</b> ${trackingPeriod.charAt(0).toUpperCase() + trackingPeriod.slice(1)}`;
+                this.resultsDiv.innerHTML = html;
+                this.downloadBtn.style.display = 'inline-block';
+                // Instructions
+                let instructions = `
+                    <b>How to use:</b><br>
+                    1. Download the CSV and open in Excel, Google Sheets, or Notion.<br>
+                    2. For each day/week, fill in the number of activities completed.<br>
+                    3. Use the Notes column for any comments or context.<br>
+                    4. Add/remove activity types as needed for your team.<br>
+                `;
+                this.instructionsDiv.innerHTML = instructions;
+                this.instructionsDiv.style.display = 'block';
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            downloadCsv() {
+                const blob = new Blob([this.csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sales_rep_activity_tracker.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div class='error-message show'>${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+            hideError() {
+                this.resultsDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new SalesRepActivityTracker();
+        });
+    </script>
+</body>
+</html> 

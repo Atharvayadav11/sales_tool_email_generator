@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outreach Channel Selector</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .channel-selector-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #00b09b, #96c93d);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 176, 155, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #00b09b;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4E8";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .channel-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #00b09b;
+        }
+        .channel-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #00b09b;
+            margin-bottom: 10px;
+        }
+        .channel-reasoning {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .channel-tips {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .channel-tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading::after {
+            content: "⏳";
+            animation: loading 1s infinite;
+        }
+        @keyframes loading {
+            0% { content: "⏳"; }
+            33% { content: "⌛"; }
+            66% { content: "⏳"; }
+        }
+        @media (max-width: 768px) {
+            .channel-selector-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="channel-selector-container">
+        <div class="header">
+            <h1>🎯 Outreach Channel Selector</h1>
+            <p>Get personalized recommendations for the best outreach channels.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="leadRole">👔 Lead Industry/Role</label>
+            <input id="leadRole" class="input-field" placeholder="E.g., Tech Startup CEO, HR Manager" />
+            
+            <label class="input-label" for="leadLocation">📍 Lead Location (optional)</label>
+            <input id="leadLocation" class="input-field" placeholder="E.g., San Francisco, Remote" />
+            
+            <label class="input-label" for="productService">🛍️ Product/Service</label>
+            <input id="productService" class="input-field" placeholder="E.g., HR Software, Marketing Agency" />
+            
+            <label class="input-label" for="outreachGoal">🎯 Outreach Goal</label>
+            <select id="outreachGoal" class="input-select">
+                <option value="meeting">Schedule Meeting</option>
+                <option value="demo">Product Demo</option>
+                <option value="info">Information Gathering</option>
+                <option value="connect">Network/Connect</option>
+                <option value="quote">Get Quote/Pricing</option>
+            </select>
+        </div>
+        <button id="generateBtn" class="generate-btn">
+            <span id="buttonText">🔍 Find Best Channels</span>
+        </button>
+        <div id="loading" class="loading">Analyzing lead profile...</div>
+        <div class="result-section" id="resultSection">
+            <div class="result-header">Recommended Channels</div>
+            <div id="results"></div>
+        </div>
+    </div>
+    <script>
+        class OutreachChannelSelector {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/select-outreach-channels';
+                this.initializeElements();
+                this.bindEvents();
+            }
+
+            initializeElements() {
+                this.leadRoleInput = document.getElementById('leadRole');
+                this.leadLocationInput = document.getElementById('leadLocation');
+                this.productServiceInput = document.getElementById('productService');
+                this.outreachGoalInput = document.getElementById('outreachGoal');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.buttonText = document.getElementById('buttonText');
+                this.loadingDiv = document.getElementById('loading');
+                this.resultSection = document.getElementById('resultSection');
+                this.resultsDiv = document.getElementById('results');
+            }
+
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.getRecommendations());
+            }
+
+            async getRecommendations() {
+                const leadRole = this.leadRoleInput.value.trim();
+                const leadLocation = this.leadLocationInput.value.trim();
+                const productService = this.productServiceInput.value.trim();
+                const outreachGoal = this.outreachGoalInput.value;
+
+                if (!leadRole || !productService) {
+                    this.showError('Please fill in the required fields (Lead Role and Product/Service).');
+                    return;
+                }
+
+                this.startLoading();
+
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            leadRole,
+                            leadLocation,
+                            productService,
+                            outreachGoal
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to get recommendations');
+                    
+                    const data = await response.json();
+                    this.displayResults(data);
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError('Failed to get channel recommendations. Please try again.');
+                } finally {
+                    this.stopLoading();
+                }
+            }
+
+            displayResults(data) {
+                let html = '';
+                data.channels.forEach(channel => {
+                    html += `
+                        <div class="channel-card">
+                            <div class="channel-name">${channel.name}</div>
+                            <div class="channel-reasoning">${channel.reasoning}</div>
+                            <div class="channel-tips">
+                                <strong>Tips:</strong>
+                                <ul>
+                                    ${channel.tips.map(tip => `<li>${tip}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                });
+                this.resultsDiv.innerHTML = html;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            startLoading() {
+                this.generateBtn.disabled = true;
+                this.buttonText.textContent = '⏳ Analyzing...';
+                this.loadingDiv.style.display = 'block';
+                this.resultSection.classList.remove('show');
+            }
+
+            stopLoading() {
+                this.generateBtn.disabled = false;
+                this.buttonText.textContent = '🔍 Find Best Channels';
+                this.loadingDiv.style.display = 'none';
+            }
+
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div style="color: #dc3545; padding: 15px;">${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new OutreachChannelSelector();
+        });
+    </script>
+</body>
+</html> 

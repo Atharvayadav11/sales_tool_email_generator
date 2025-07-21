@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Message Template Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .linkedin-generator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0077b5 0%, #00a0dc 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #0077b5, #00a0dc);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 119, 181, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #0077b5;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4AC";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .message-template {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0077b5;
+        }
+        .message-template h3 {
+            color: #0077b5;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .message-text {
+            white-space: pre-wrap;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .copy-btn {
+            padding: 8px 16px;
+            background: #0077b5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+        .copy-btn:hover {
+            background: #005582;
+        }
+        .tips-section {
+            background: #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        .tips-section h3 {
+            color: #0077b5;
+            margin-bottom: 10px;
+        }
+        .tips-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .tips-list li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .tips-list li::before {
+            content: "💡";
+            position: absolute;
+            left: 0;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading::after {
+            content: "⏳";
+            animation: loading 1s infinite;
+        }
+        @keyframes loading {
+            0% { content: "⏳"; }
+            33% { content: "⌛"; }
+            66% { content: "⏳"; }
+        }
+        @media (max-width: 768px) {
+            .linkedin-generator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="linkedin-generator-container">
+        <div class="header">
+            <h1>💼 LinkedIn Message Generator</h1>
+            <p>Create personalized LinkedIn outreach messages that get responses.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="leadPersona">👤 Lead Persona/Role</label>
+            <input id="leadPersona" class="input-field" placeholder="E.g., CTO at SaaS startup, HR Director at enterprise" />
+            
+            <label class="input-label" for="outreachGoal">🎯 Outreach Goal</label>
+            <select id="outreachGoal" class="input-select">
+                <option value="meeting">Schedule Meeting</option>
+                <option value="connection">Build Connection</option>
+                <option value="info">Information Gathering</option>
+                <option value="demo">Product Demo</option>
+                <option value="referral">Ask for Referral</option>
+            </select>
+            
+            <label class="input-label" for="productService">🛍️ Product/Service</label>
+            <input id="productService" class="input-field" placeholder="E.g., AI-powered CRM, Leadership Training Program" />
+            
+            <label class="input-label" for="personalizationHook">🎣 Personalization Hook (optional)</label>
+            <textarea id="personalizationHook" class="input-textarea" placeholder="E.g., Recent company news, shared connection, mutual interest&#10;Recent achievement or post they made&#10;Common background or experience"></textarea>
+        </div>
+        <button id="generateBtn" class="generate-btn">
+            <span id="buttonText">✍️ Generate Messages</span>
+        </button>
+        <div id="loading" class="loading">Crafting personalized messages...</div>
+        <div class="result-section" id="resultSection">
+            <div class="result-header">LinkedIn Message Templates</div>
+            <div id="messageTemplates"></div>
+            <div id="personalizationTips" class="tips-section"></div>
+        </div>
+    </div>
+    <script>
+        class LinkedInMessageGenerator {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/generate-linkedin-messages';
+                this.initializeElements();
+                this.bindEvents();
+            }
+
+            initializeElements() {
+                this.leadPersonaInput = document.getElementById('leadPersona');
+                this.outreachGoalInput = document.getElementById('outreachGoal');
+                this.productServiceInput = document.getElementById('productService');
+                this.personalizationHookInput = document.getElementById('personalizationHook');
+                this.generateBtn = document.getElementById('generateBtn');
+                this.buttonText = document.getElementById('buttonText');
+                this.loadingDiv = document.getElementById('loading');
+                this.resultSection = document.getElementById('resultSection');
+                this.messageTemplatesDiv = document.getElementById('messageTemplates');
+                this.personalizationTipsDiv = document.getElementById('personalizationTips');
+            }
+
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateMessages());
+            }
+
+            async generateMessages() {
+                const leadPersona = this.leadPersonaInput.value.trim();
+                const outreachGoal = this.outreachGoalInput.value;
+                const productService = this.productServiceInput.value.trim();
+                const personalizationHook = this.personalizationHookInput.value.trim();
+
+                if (!leadPersona || !productService) {
+                    this.showError('Please fill in the required fields (Lead Persona and Product/Service).');
+                    return;
+                }
+
+                this.startLoading();
+
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            leadPersona,
+                            outreachGoal,
+                            productService,
+                            personalizationHook
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Failed to generate messages');
+                    
+                    const data = await response.json();
+                    this.displayResults(data);
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.showError('Failed to generate message templates. Please try again.');
+                } finally {
+                    this.stopLoading();
+                }
+            }
+
+            displayResults(data) {
+                let templatesHtml = '';
+                data.messages.forEach((message, index) => {
+                    templatesHtml += `
+                        <div class="message-template">
+                            <h3>Template ${index + 1}</h3>
+                            <div class="message-text">${message.text}</div>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('${message.text.replace(/'/g, "\\'")}')">
+                                📋 Copy Message
+                            </button>
+                        </div>
+                    `;
+                });
+                this.messageTemplatesDiv.innerHTML = templatesHtml;
+
+                let tipsHtml = `
+                    <h3>Personalization Tips</h3>
+                    <ul class="tips-list">
+                        ${data.tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                `;
+                this.personalizationTipsDiv.innerHTML = tipsHtml;
+
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            startLoading() {
+                this.generateBtn.disabled = true;
+                this.buttonText.textContent = '⏳ Generating...';
+                this.loadingDiv.style.display = 'block';
+                this.resultSection.classList.remove('show');
+            }
+
+            stopLoading() {
+                this.generateBtn.disabled = false;
+                this.buttonText.textContent = '✍️ Generate Messages';
+                this.loadingDiv.style.display = 'none';
+            }
+
+            showError(message) {
+                this.messageTemplatesDiv.innerHTML = `<div style="color: #dc3545; padding: 15px;">${message}</div>`;
+                this.personalizationTipsDiv.innerHTML = '';
+                this.resultSection.classList.add('show');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new LinkedInMessageGenerator();
+        });
+    </script>
+</body>
+</html> 
