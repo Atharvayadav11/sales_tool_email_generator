@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Zone Meeting Finder</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .tz-meeting-finder-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading-spinner {
+            display: none;
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\23F0";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        .share-btn, .calendar-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-right: 10px;
+        }
+        .share-btn:hover, .calendar-btn:hover { background: #5a6fd8; }
+        @media (max-width: 768px) {
+            .tz-meeting-finder-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tz-meeting-finder-container">
+        <div class="header">
+            <h1>⏰ Time Zone Meeting Finder</h1>
+            <p>Find the best overlapping meeting times across time zones.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="userTimezone">🌍 Your Timezone</label>
+            <select id="userTimezone" class="input-select"></select>
+            <label class="input-label" for="leadLocations">📍 Lead’s Location(s)</label>
+            <input id="leadLocations" class="input-field" placeholder="E.g., New York, London, Mumbai" />
+            <label class="input-label" for="callDuration">⏳ Preferred Call Duration</label>
+            <select id="callDuration" class="input-select">
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">60 min</option>
+            </select>
+        </div>
+        <button id="findSlotsBtn" class="generate-btn">
+            <div class="loading-spinner" id="tzLoadingSpinner"></div>
+            <span id="tzButtonText">🔍 Find Meeting Times</span>
+        </button>
+        <div class="error-message" id="tzErrorMessage"></div>
+        <div class="result-section" id="tzResultSection">
+            <div class="result-header">Optimal Meeting Slots</div>
+            <div id="tzSlotsTable" style="overflow-x:auto;"></div>
+            <button id="calendarBtn" class="calendar-btn" style="display:none;">📅 Add to Calendar</button>
+            <button id="shareBtn" class="share-btn" style="display:none;">🔗 Copy/Share Link</button>
+        </div>
+    </div>
+    <script>
+        class TimeZoneMeetingFinder {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/find-meeting-slots';
+                this.initializeElements();
+                this.bindEvents();
+                this.timezones = [];
+                this.lastShareLink = '';
+            }
+            initializeElements() {
+                this.userTimezoneInput = document.getElementById('userTimezone');
+                this.leadLocationsInput = document.getElementById('leadLocations');
+                this.callDurationInput = document.getElementById('callDuration');
+                this.findBtn = document.getElementById('findSlotsBtn');
+                this.loadingSpinner = document.getElementById('tzLoadingSpinner');
+                this.buttonText = document.getElementById('tzButtonText');
+                this.resultSection = document.getElementById('tzResultSection');
+                this.errorMessage = document.getElementById('tzErrorMessage');
+                this.slotsTableDiv = document.getElementById('tzSlotsTable');
+                this.calendarBtn = document.getElementById('calendarBtn');
+                this.shareBtn = document.getElementById('shareBtn');
+            }
+            bindEvents() {
+                this.findBtn.addEventListener('click', () => this.findMeetingSlots());
+                this.calendarBtn.addEventListener('click', () => this.exportToCalendar());
+                this.shareBtn.addEventListener('click', () => this.copyShareLink());
+            }
+            async populateTimezones() {
+                // Use Intl API for all timezones
+                this.timezones = Intl.supportedValuesOf ? Intl.supportedValuesOf('timeZone') : ["UTC"];
+                this.userTimezoneInput.innerHTML = this.timezones.map(tz => `<option value="${tz}">${tz}</option>`).join('');
+                // Try to autodetect
+                const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                if (detected && this.timezones.includes(detected)) {
+                    this.userTimezoneInput.value = detected;
+                }
+            }
+            async findMeetingSlots() {
+                const userTimezone = this.userTimezoneInput.value;
+                const leadLocations = this.leadLocationsInput.value.trim();
+                const callDuration = this.callDurationInput.value;
+                if (!userTimezone) {
+                    this.showError('Please select your timezone.');
+                    return;
+                }
+                if (!leadLocations) {
+                    this.showError('Please enter lead locations.');
+                    return;
+                }
+                this.setLoadingState(true);
+                this.hideError();
+                this.hideResult();
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userTimezone, leadLocations, callDuration })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (!data.slotsTableHtml) {
+                        throw new Error('Invalid response format from server.');
+                    }
+                    this.lastShareLink = data.meetingLink || '';
+                    this.displayResult(data.slotsTableHtml);
+                } catch (error) {
+                    this.showError(`Failed to find slots: ${error.message}`);
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+            setLoadingState(isLoading) {
+                if (isLoading) {
+                    this.findBtn.disabled = true;
+                    this.loadingSpinner.style.display = 'inline-block';
+                    this.buttonText.textContent = 'Finding...';
+                } else {
+                    this.findBtn.disabled = false;
+                    this.loadingSpinner.style.display = 'none';
+                    this.buttonText.textContent = '🔍 Find Meeting Times';
+                }
+            }
+            displayResult(tableHtml) {
+                this.slotsTableDiv.innerHTML = tableHtml;
+                this.resultSection.classList.add('show');
+                this.calendarBtn.style.display = 'inline-block';
+                this.shareBtn.style.display = 'inline-block';
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            hideResult() {
+                this.resultSection.classList.remove('show');
+                this.calendarBtn.style.display = 'none';
+                this.shareBtn.style.display = 'none';
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+            exportToCalendar() {
+                if (!this.lastShareLink) return;
+                window.open(this.lastShareLink + '&export=calendar', '_blank');
+            }
+            copyShareLink() {
+                if (!this.lastShareLink) return;
+                navigator.clipboard.writeText(this.lastShareLink);
+                this.shareBtn.textContent = '✅ Link Copied!';
+                setTimeout(() => {
+                    this.shareBtn.textContent = '🔗 Copy/Share Link';
+                }, 2000);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const finder = new TimeZoneMeetingFinder();
+            finder.populateTimezones();
+        });
+    </script>
+</body>
+</html> 

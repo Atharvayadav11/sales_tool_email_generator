@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICP Persona Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .icp-persona-generator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading-spinner {
+            display: none;
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F464";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .result-block {
+            margin-bottom: 18px;
+        }
+        .result-block b {
+            color: #764ba2;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        @media (max-width: 768px) {
+            .icp-persona-generator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="icp-persona-generator-container">
+        <div class="header">
+            <h1>🧑‍💼 ICP Persona Generator</h1>
+            <p>Generate a detailed, actionable Ideal Customer Persona for your business.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="productDescription">📝 Product Description</label>
+            <textarea id="productDescription" class="input-textarea" placeholder="Describe your product or service..."></textarea>
+            <label class="input-label" for="existingCustomers">👥 Existing Customers (optional)</label>
+            <textarea id="existingCustomers" class="input-textarea" placeholder="List notable customers, industries, or segments..."></textarea>
+            <label class="input-label" for="industry">🏭 Industry</label>
+            <input id="industry" class="input-field" placeholder="E.g., SaaS, Healthcare, Retail" />
+            <label class="input-label" for="companySize">🏢 Company Size</label>
+            <input id="companySize" class="input-field" placeholder="E.g., 11-50, 100-500, Enterprise" />
+            <label class="input-label" for="jobTitles">💼 Job Titles</label>
+            <input id="jobTitles" class="input-field" placeholder="E.g., CTO, HR Manager, VP of Sales" />
+        </div>
+        <button id="generatePersonaBtn" class="generate-btn">
+            <div class="loading-spinner" id="personaLoadingSpinner"></div>
+            <span id="personaButtonText">🎯 Generate ICP Persona</span>
+        </button>
+        <div class="error-message" id="personaErrorMessage"></div>
+        <div class="result-section" id="personaResultSection">
+            <div class="result-header">ICP Persona</div>
+            <div id="personaResultBlocks"></div>
+        </div>
+    </div>
+    <script>
+        class ICPPersonaGenerator {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/generate-icp-persona';
+                this.initializeElements();
+                this.bindEvents();
+            }
+            initializeElements() {
+                this.productDescriptionInput = document.getElementById('productDescription');
+                this.existingCustomersInput = document.getElementById('existingCustomers');
+                this.industryInput = document.getElementById('industry');
+                this.companySizeInput = document.getElementById('companySize');
+                this.jobTitlesInput = document.getElementById('jobTitles');
+                this.generateBtn = document.getElementById('generatePersonaBtn');
+                this.loadingSpinner = document.getElementById('personaLoadingSpinner');
+                this.buttonText = document.getElementById('personaButtonText');
+                this.resultSection = document.getElementById('personaResultSection');
+                this.errorMessage = document.getElementById('personaErrorMessage');
+                this.resultBlocksDiv = document.getElementById('personaResultBlocks');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generatePersona());
+                this.productDescriptionInput.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        this.generatePersona();
+                    }
+                });
+            }
+            async generatePersona() {
+                const productDescription = this.productDescriptionInput.value.trim();
+                const existingCustomers = this.existingCustomersInput.value.trim();
+                const industry = this.industryInput.value.trim();
+                const companySize = this.companySizeInput.value.trim();
+                const jobTitles = this.jobTitlesInput.value.trim();
+                if (!productDescription) {
+                    this.showError('Please enter a product description.');
+                    return;
+                }
+                if (!industry) {
+                    this.showError('Please enter the industry.');
+                    return;
+                }
+                if (!companySize) {
+                    this.showError('Please enter the company size.');
+                    return;
+                }
+                if (!jobTitles) {
+                    this.showError('Please enter job titles.');
+                    return;
+                }
+                this.setLoadingState(true);
+                this.hideError();
+                this.hideResult();
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productDescription, existingCustomers, industry, companySize, jobTitles })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (!data.persona || typeof data.persona !== 'object') {
+                        throw new Error('Invalid response format from server.');
+                    }
+                    this.displayResult(data.persona);
+                } catch (error) {
+                    this.showError(`Failed to generate: ${error.message}`);
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+            setLoadingState(isLoading) {
+                if (isLoading) {
+                    this.generateBtn.disabled = true;
+                    this.loadingSpinner.style.display = 'inline-block';
+                    this.buttonText.textContent = 'Generating...';
+                } else {
+                    this.generateBtn.disabled = false;
+                    this.loadingSpinner.style.display = 'none';
+                    this.buttonText.textContent = '🎯 Generate ICP Persona';
+                }
+            }
+            displayResult(persona) {
+                this.resultBlocksDiv.innerHTML = `
+                    <div class='result-block'><b>Name & Background:</b><br>${persona.nameBackground || ''}</div>
+                    <div class='result-block'><b>Pain Points:</b><br>${Array.isArray(persona.painPoints) ? persona.painPoints.map(p => `- ${p}`).join('<br>') : ''}</div>
+                    <div class='result-block'><b>Goals:</b><br>${Array.isArray(persona.goals) ? persona.goals.map(g => `- ${g}`).join('<br>') : ''}</div>
+                    <div class='result-block'><b>Objections:</b><br>${Array.isArray(persona.objections) ? persona.objections.map(o => `- ${o}`).join('<br>') : ''}</div>
+                    <div class='result-block'><b>Communication Preferences:</b><br>${persona.communicationPreferences || ''}</div>
+                    <div class='result-block'><b>Ideal Messaging Tone/Style:</b><br>${persona.toneStyle || ''}</div>
+                `;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            hideResult() {
+                this.resultSection.classList.remove('show');
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new ICPPersonaGenerator();
+        });
+    </script>
+</body>
+</html> 

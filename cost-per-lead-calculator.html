@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost per Lead Calculator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .cpl-calculator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4B0";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        @media (max-width: 768px) {
+            .cpl-calculator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cpl-calculator-container">
+        <div class="header">
+            <h1>💰 Cost per Lead Calculator</h1>
+            <p>Find your true cost to acquire each lead and qualified lead.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="totalSpend">💸 Total Spend (ads, tools, SDR salaries)</label>
+            <input id="totalSpend" class="input-field" type="number" min="0" step="0.01" placeholder="E.g., 1000" />
+            <label class="input-label" for="totalLeads">👥 Total Leads Generated</label>
+            <input id="totalLeads" class="input-field" type="number" min="1" placeholder="E.g., 50" />
+            <label class="input-label" for="qualifiedLeads">✅ Total Qualified Leads (optional)</label>
+            <input id="qualifiedLeads" class="input-field" type="number" min="0" placeholder="E.g., 10" />
+        </div>
+        <button id="calcCplBtn" class="generate-btn">
+            <span id="cplButtonText">🧮 Calculate CPL</span>
+        </button>
+        <div class="error-message" id="cplErrorMessage"></div>
+        <div class="result-section" id="cplResultSection">
+            <div class="result-header">CPL Results</div>
+            <div id="cplResults"></div>
+        </div>
+    </div>
+    <script>
+        class CostPerLeadCalculator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+            }
+            initializeElements() {
+                this.totalSpendInput = document.getElementById('totalSpend');
+                this.totalLeadsInput = document.getElementById('totalLeads');
+                this.qualifiedLeadsInput = document.getElementById('qualifiedLeads');
+                this.calcBtn = document.getElementById('calcCplBtn');
+                this.buttonText = document.getElementById('cplButtonText');
+                this.resultSection = document.getElementById('cplResultSection');
+                this.errorMessage = document.getElementById('cplErrorMessage');
+                this.resultsDiv = document.getElementById('cplResults');
+            }
+            bindEvents() {
+                this.calcBtn.addEventListener('click', () => this.calculateCpl());
+            }
+            calculateCpl() {
+                const totalSpend = parseFloat(this.totalSpendInput.value);
+                const totalLeads = parseInt(this.totalLeadsInput.value, 10);
+                const qualifiedLeads = parseInt(this.qualifiedLeadsInput.value, 10);
+                if (isNaN(totalSpend) || totalSpend < 0) {
+                    this.showError('Please enter a valid total spend.');
+                    return;
+                }
+                if (!totalLeads || totalLeads <= 0) {
+                    this.showError('Please enter a valid number of leads.');
+                    return;
+                }
+                this.hideError();
+                const cpl = totalSpend / totalLeads;
+                let resultHtml = `<b>Cost per Lead (CPL):</b> $${cpl.toFixed(2)}<br>`;
+                if (!isNaN(qualifiedLeads) && qualifiedLeads > 0) {
+                    const cpql = totalSpend / qualifiedLeads;
+                    resultHtml += `<b>Cost per Qualified Lead (CPQL):</b> $${cpql.toFixed(2)}<br>`;
+                }
+                this.resultsDiv.innerHTML = resultHtml;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new CostPerLeadCalculator();
+        });
+    </script>
+</body>
+</html> 
