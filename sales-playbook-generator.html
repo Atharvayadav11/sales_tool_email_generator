@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Playbook Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .playbook-generator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4D1";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .download-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover { background: #5a6fd8; }
+        @media (max-width: 768px) {
+            .playbook-generator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="playbook-generator-container">
+        <div class="header">
+            <h1>📑 Sales Playbook Generator</h1>
+            <p>Create a custom sales playbook for your team in seconds.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="productService">🛠️ Product/Service</label>
+            <input id="productService" class="input-field" placeholder="E.g., CRM, SaaS, HR tech" />
+            <label class="input-label" for="salesStrategy">🎯 Sales Strategy</label>
+            <select id="salesStrategy" class="input-select">
+                <option value="inbound">Inbound</option>
+                <option value="outbound">Outbound</option>
+                <option value="hybrid">Hybrid</option>
+            </select>
+            <label class="input-label" for="targetMarket">🏢 Target Market / ICP</label>
+            <input id="targetMarket" class="input-field" placeholder="E.g., SMBs, B2B SaaS, Healthcare" />
+            <label class="input-label" for="keyObjections">❓ Key Objections</label>
+            <textarea id="keyObjections" class="input-textarea" placeholder="E.g., Too expensive, No need, Already using a competitor"></textarea>
+        </div>
+        <button id="generatePlaybookBtn" class="generate-btn">
+            <span id="playbookButtonText">🧮 Generate Playbook</span>
+        </button>
+        <div class="result-section" id="playbookResultSection">
+            <div class="result-header">Sales Playbook</div>
+            <div id="playbookResults"></div>
+            <button id="downloadPlaybookBtn" class="download-btn" style="display:none;">⬇️ Download Playbook (Markdown)</button>
+        </div>
+    </div>
+    <script>
+        class SalesPlaybookGenerator {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/generate-sales-playbook';
+                this.initializeElements();
+                this.bindEvents();
+                this.playbookMarkdown = '';
+            }
+            initializeElements() {
+                this.productServiceInput = document.getElementById('productService');
+                this.salesStrategyInput = document.getElementById('salesStrategy');
+                this.targetMarketInput = document.getElementById('targetMarket');
+                this.keyObjectionsInput = document.getElementById('keyObjections');
+                this.generateBtn = document.getElementById('generatePlaybookBtn');
+                this.buttonText = document.getElementById('playbookButtonText');
+                this.resultSection = document.getElementById('playbookResultSection');
+                this.resultsDiv = document.getElementById('playbookResults');
+                this.downloadBtn = document.getElementById('downloadPlaybookBtn');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generatePlaybook());
+                this.downloadBtn.addEventListener('click', () => this.downloadPlaybook());
+            }
+            async generatePlaybook() {
+                const productService = this.productServiceInput.value.trim();
+                const salesStrategy = this.salesStrategyInput.value;
+                const targetMarket = this.targetMarketInput.value.trim();
+                const keyObjections = this.keyObjectionsInput.value.trim();
+                if (!productService) {
+                    this.showError('Please enter a product or service.');
+                    return;
+                }
+                if (!salesStrategy) {
+                    this.showError('Please select a sales strategy.');
+                    return;
+                }
+                if (!targetMarket) {
+                    this.showError('Please enter a target market or ICP.');
+                    return;
+                }
+                if (!keyObjections) {
+                    this.showError('Please enter key objections.');
+                    return;
+                }
+                this.hideError();
+                this.buttonText.textContent = 'Generating...';
+                this.generateBtn.disabled = true;
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productService, salesStrategy, targetMarket, keyObjections })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (!data.playbookMarkdown) {
+                        throw new Error('Invalid response format from server.');
+                    }
+                    this.playbookMarkdown = data.playbookMarkdown;
+                    this.displayResult(data.playbookMarkdown);
+                } catch (error) {
+                    this.showError(`Failed to generate: ${error.message}`);
+                } finally {
+                    this.buttonText.textContent = '🧮 Generate Playbook';
+                    this.generateBtn.disabled = false;
+                }
+            }
+            displayResult(markdown) {
+                // Simple markdown to HTML (headings, lists, bold)
+                let html = markdown
+                    .replace(/^### (.*)$/gm, '<h3>$1</h3>')
+                    .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+                    .replace(/^# (.*)$/gm, '<h1>$1</h1>')
+                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/^- (.*)$/gm, '<li>$1</li>');
+                html = html.replace(/(<br>)(<li>)/g, '<ul>$2').replace(/(<li>.*<br>)/g, '$1</ul>');
+                this.resultsDiv.innerHTML = html;
+                this.downloadBtn.style.display = 'inline-block';
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            downloadPlaybook() {
+                const blob = new Blob([this.playbookMarkdown], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sales_playbook.md';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div class='error-message show'>${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+            hideError() {
+                this.resultsDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new SalesPlaybookGenerator();
+        });
+    </script>
+</body>
+</html> 

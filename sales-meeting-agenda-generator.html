@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Meeting Agenda Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .agenda-generator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4CB";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .download-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover { background: #5a6fd8; }
+        @media (max-width: 768px) {
+            .agenda-generator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="agenda-generator-container">
+        <div class="header">
+            <h1>📝 Sales Meeting Agenda Generator</h1>
+            <p>Generate a structured agenda for your next sales call.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="meetingType">📅 Meeting Type</label>
+            <select id="meetingType" class="input-select">
+                <option value="discovery">Discovery</option>
+                <option value="demo">Demo</option>
+                <option value="negotiation">Negotiation</option>
+                <option value="follow-up">Follow-up</option>
+                <option value="kickoff">Kickoff</option>
+                <option value="custom">Custom</option>
+            </select>
+            <label class="input-label" for="productService">🛠️ Product/Service</label>
+            <input id="productService" class="input-field" placeholder="E.g., CRM, SaaS, HR tech" />
+            <label class="input-label" for="objectives">🎯 Key Objectives</label>
+            <textarea id="objectives" class="input-textarea" placeholder="E.g., Understand pain points, Show product demo, Discuss pricing"></textarea>
+            <label class="input-label" for="attendees">👥 Attendees (optional)</label>
+            <input id="attendees" class="input-field" placeholder="E.g., John Doe, Jane Smith" />
+        </div>
+        <button id="generateAgendaBtn" class="generate-btn">
+            <span id="agendaButtonText">🧮 Generate Agenda</span>
+        </button>
+        <div class="result-section" id="agendaResultSection">
+            <div class="result-header">Meeting Agenda</div>
+            <div id="agendaResults"></div>
+            <button id="downloadAgendaBtn" class="download-btn" style="display:none;">⬇️ Download Agenda (Text)</button>
+        </div>
+    </div>
+    <script>
+        class SalesMeetingAgendaGenerator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.agendaText = '';
+            }
+            initializeElements() {
+                this.meetingTypeInput = document.getElementById('meetingType');
+                this.productServiceInput = document.getElementById('productService');
+                this.objectivesInput = document.getElementById('objectives');
+                this.attendeesInput = document.getElementById('attendees');
+                this.generateBtn = document.getElementById('generateAgendaBtn');
+                this.buttonText = document.getElementById('agendaButtonText');
+                this.resultSection = document.getElementById('agendaResultSection');
+                this.resultsDiv = document.getElementById('agendaResults');
+                this.downloadBtn = document.getElementById('downloadAgendaBtn');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateAgenda());
+                this.downloadBtn.addEventListener('click', () => this.downloadAgenda());
+            }
+            generateAgenda() {
+                const meetingType = this.meetingTypeInput.value;
+                const productService = this.productServiceInput.value.trim();
+                const objectivesRaw = this.objectivesInput.value.trim();
+                const attendees = this.attendeesInput.value.trim();
+                if (!meetingType) {
+                    this.showError('Please select a meeting type.');
+                    return;
+                }
+                if (!productService) {
+                    this.showError('Please enter a product or service.');
+                    return;
+                }
+                if (!objectivesRaw) {
+                    this.showError('Please enter key objectives.');
+                    return;
+                }
+                this.hideError();
+                // Parse objectives
+                const objectives = objectivesRaw.split(/,|\n/).map(o => o.trim()).filter(Boolean);
+                // Generate agenda sections based on meeting type
+                const sections = this.getAgendaSections(meetingType, objectives, productService);
+                let agendaHtml = `<b>Product/Service:</b> ${productService}<br>`;
+                if (attendees) agendaHtml += `<b>Attendees:</b> ${attendees}<br>`;
+                agendaHtml += '<ul style="margin-top:10px;">';
+                sections.forEach(s => {
+                    agendaHtml += `<li><b>${s.title} (${s.time} min):</b> ${s.desc}</li>`;
+                });
+                agendaHtml += '</ul>';
+                this.resultsDiv.innerHTML = agendaHtml;
+                // Agenda text for download
+                let agendaText = `Sales Meeting Agenda\nProduct/Service: ${productService}\n`;
+                if (attendees) agendaText += `Attendees: ${attendees}\n`;
+                sections.forEach(s => {
+                    agendaText += `\n${s.title} (${s.time} min): ${s.desc}`;
+                });
+                this.agendaText = agendaText;
+                this.downloadBtn.style.display = 'inline-block';
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            getAgendaSections(meetingType, objectives, productService) {
+                // Default time allocations (can be customized per type)
+                const baseSections = {
+                    discovery: [
+                        { title: 'Introductions', time: 5, desc: 'Meet and greet, set expectations.' },
+                        { title: 'Understanding Needs', time: 10, desc: 'Discuss pain points and goals.' },
+                        { title: 'Product Overview', time: 10, desc: `Brief overview of ${productService}.` },
+                        { title: 'Q&A', time: 5, desc: 'Answer questions.' },
+                        { title: 'Next Steps', time: 5, desc: 'Agree on follow-up actions.' }
+                    ],
+                    demo: [
+                        { title: 'Introductions', time: 5, desc: 'Meet and greet, set expectations.' },
+                        { title: 'Recap Needs', time: 5, desc: 'Review pain points and goals.' },
+                        { title: 'Product Demo', time: 15, desc: `Live demo of ${productService}.` },
+                        { title: 'Q&A', time: 10, desc: 'Answer questions.' },
+                        { title: 'Next Steps', time: 5, desc: 'Agree on follow-up actions.' }
+                    ],
+                    negotiation: [
+                        { title: 'Introductions', time: 5, desc: 'Meet and greet.' },
+                        { title: 'Recap Proposal', time: 5, desc: 'Review proposal and terms.' },
+                        { title: 'Negotiation', time: 15, desc: 'Discuss pricing, terms, and objections.' },
+                        { title: 'Agreement', time: 5, desc: 'Confirm agreement or next steps.' }
+                    ],
+                    followup: [
+                        { title: 'Introductions', time: 5, desc: 'Meet and greet.' },
+                        { title: 'Review Progress', time: 10, desc: 'Discuss progress since last meeting.' },
+                        { title: 'Address Issues', time: 10, desc: 'Resolve any open issues.' },
+                        { title: 'Next Steps', time: 5, desc: 'Agree on follow-up actions.' }
+                    ],
+                    kickoff: [
+                        { title: 'Introductions', time: 5, desc: 'Meet and greet.' },
+                        { title: 'Project Overview', time: 10, desc: 'Outline project goals and deliverables.' },
+                        { title: 'Roles & Responsibilities', time: 10, desc: 'Define team roles.' },
+                        { title: 'Timeline & Next Steps', time: 5, desc: 'Review timeline and next actions.' }
+                    ],
+                    custom: []
+                };
+                let sections = baseSections[meetingType] || baseSections['custom'];
+                // For custom or to enhance, add objectives as talking points
+                if (meetingType === 'custom' || objectives.length > 0) {
+                    objectives.forEach((obj, i) => {
+                        sections.push({ title: `Objective ${i+1}`, time: 5, desc: obj });
+                    });
+                }
+                return sections;
+            }
+            downloadAgenda() {
+                const blob = new Blob([this.agendaText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sales_meeting_agenda.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div class='error-message show'>${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+            hideError() {
+                this.resultsDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new SalesMeetingAgendaGenerator();
+        });
+    </script>
+</body>
+</html> 

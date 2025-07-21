@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Target Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .target-calculator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4C8";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        #targetChart { max-width: 100%; background: #fff; border-radius: 10px; margin-top: 20px; }
+        @media (max-width: 768px) {
+            .target-calculator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="target-calculator-container">
+        <div class="header">
+            <h1>🎯 Sales Target Calculator</h1>
+            <p>Find out how many leads, meetings, and deals you need to hit your revenue goal.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="revenueTarget">💰 Revenue Target</label>
+            <input id="revenueTarget" class="input-field" type="number" min="1" placeholder="E.g., 100000" />
+            <label class="input-label" for="dealSize">📦 Average Deal Size</label>
+            <input id="dealSize" class="input-field" type="number" min="1" placeholder="E.g., 5000" />
+            <label class="input-label" for="leadToMeeting">🔗 Lead-to-Meeting Conversion Rate (%)</label>
+            <input id="leadToMeeting" class="input-field" type="number" min="0.01" max="100" step="0.01" placeholder="E.g., 10" />
+            <label class="input-label" for="meetingToClose">🏆 Meeting-to-Close Conversion Rate (%)</label>
+            <input id="meetingToClose" class="input-field" type="number" min="0.01" max="100" step="0.01" placeholder="E.g., 20" />
+        </div>
+        <button id="calcTargetBtn" class="generate-btn">
+            <span id="targetButtonText">🧮 Calculate Target</span>
+        </button>
+        <div class="error-message" id="targetErrorMessage"></div>
+        <div class="result-section" id="targetResultSection">
+            <div class="result-header">Target Breakdown</div>
+            <div id="targetResults"></div>
+            <canvas id="targetChart" height="180"></canvas>
+        </div>
+    </div>
+    <script>
+        class SalesTargetCalculator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.chart = null;
+            }
+            initializeElements() {
+                this.revenueTargetInput = document.getElementById('revenueTarget');
+                this.dealSizeInput = document.getElementById('dealSize');
+                this.leadToMeetingInput = document.getElementById('leadToMeeting');
+                this.meetingToCloseInput = document.getElementById('meetingToClose');
+                this.calcBtn = document.getElementById('calcTargetBtn');
+                this.buttonText = document.getElementById('targetButtonText');
+                this.resultSection = document.getElementById('targetResultSection');
+                this.errorMessage = document.getElementById('targetErrorMessage');
+                this.resultsDiv = document.getElementById('targetResults');
+                this.chartCanvas = document.getElementById('targetChart');
+            }
+            bindEvents() {
+                this.calcBtn.addEventListener('click', () => this.calculateTarget());
+            }
+            calculateTarget() {
+                const revenueTarget = parseFloat(this.revenueTargetInput.value);
+                const dealSize = parseFloat(this.dealSizeInput.value);
+                const leadToMeeting = parseFloat(this.leadToMeetingInput.value);
+                const meetingToClose = parseFloat(this.meetingToCloseInput.value);
+                if (isNaN(revenueTarget) || revenueTarget <= 0) {
+                    this.showError('Please enter a valid revenue target.');
+                    return;
+                }
+                if (isNaN(dealSize) || dealSize <= 0) {
+                    this.showError('Please enter a valid average deal size.');
+                    return;
+                }
+                if (isNaN(leadToMeeting) || leadToMeeting <= 0 || leadToMeeting > 100) {
+                    this.showError('Please enter a valid lead-to-meeting conversion rate.');
+                    return;
+                }
+                if (isNaN(meetingToClose) || meetingToClose <= 0 || meetingToClose > 100) {
+                    this.showError('Please enter a valid meeting-to-close conversion rate.');
+                    return;
+                }
+                this.hideError();
+                // Calculations
+                const numDeals = Math.ceil(revenueTarget / dealSize);
+                const numMeetings = Math.ceil(numDeals / (meetingToClose / 100));
+                const numLeads = Math.ceil(numMeetings / (leadToMeeting / 100));
+                // Results
+                this.resultsDiv.innerHTML = `
+                    <b>Deals Needed:</b> ${numDeals}<br>
+                    <b>Meetings Needed:</b> ${numMeetings}<br>
+                    <b>Leads Needed:</b> ${numLeads}<br>
+                `;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                this.renderChart(numLeads, numMeetings, numDeals);
+            }
+            renderChart(numLeads, numMeetings, numDeals) {
+                if (this.chart) this.chart.destroy();
+                this.chart = new Chart(this.chartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Leads', 'Meetings', 'Deals'],
+                        datasets: [{
+                            label: 'Target Breakdown',
+                            data: [numLeads, numMeetings, numDeals],
+                            backgroundColor: [
+                                'rgba(102,126,234,0.7)',
+                                'rgba(118,75,162,0.7)',
+                                'rgba(255,107,107,0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Stage' } },
+                            y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new SalesTargetCalculator();
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales KPI Dashboard Template</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .kpi-dashboard-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 40px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4C8";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .download-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover { background: #5a6fd8; }
+        .instructions {
+            margin-top: 18px;
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 1em;
+        }
+        @media (max-width: 768px) {
+            .kpi-dashboard-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="kpi-dashboard-container">
+        <div class="header">
+            <h1>📊 Sales KPI Dashboard Template</h1>
+            <p>Download a dashboard template to track your key sales metrics.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="kpis">📈 KPIs to Track</label>
+            <textarea id="kpis" class="input-textarea" placeholder="E.g., Leads, Meetings, Pipeline Value, Win Rate, Revenue"></textarea>
+            <label class="input-label" for="trackingPeriod">⏳ Tracking Period</label>
+            <select id="trackingPeriod" class="input-select">
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+            </select>
+            <label class="input-label" for="teamName">👤 Team/Rep Name (optional)</label>
+            <input id="teamName" class="input-field" placeholder="E.g., John Doe, Sales Team A" />
+        </div>
+        <button id="generateKpiBtn" class="generate-btn">
+            <span id="kpiButtonText">🧮 Generate Dashboard</span>
+        </button>
+        <div class="result-section" id="kpiResultSection">
+            <div class="result-header">KPI Dashboard Template</div>
+            <div id="kpiResults"></div>
+            <button id="downloadKpiBtn" class="download-btn" style="display:none;">⬇️ Download CSV Template</button>
+            <div class="instructions" id="kpiInstructions" style="display:none;"></div>
+        </div>
+    </div>
+    <script>
+        class SalesKpiDashboardTemplate {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.csvContent = '';
+            }
+            initializeElements() {
+                this.kpisInput = document.getElementById('kpis');
+                this.trackingPeriodInput = document.getElementById('trackingPeriod');
+                this.teamNameInput = document.getElementById('teamName');
+                this.generateBtn = document.getElementById('generateKpiBtn');
+                this.buttonText = document.getElementById('kpiButtonText');
+                this.resultSection = document.getElementById('kpiResultSection');
+                this.resultsDiv = document.getElementById('kpiResults');
+                this.downloadBtn = document.getElementById('downloadKpiBtn');
+                this.instructionsDiv = document.getElementById('kpiInstructions');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateKpiTemplate());
+                this.downloadBtn.addEventListener('click', () => this.downloadCsv());
+            }
+            generateKpiTemplate() {
+                const kpisRaw = this.kpisInput.value.trim();
+                const trackingPeriod = this.trackingPeriodInput.value;
+                const teamName = this.teamNameInput.value.trim();
+                if (!kpisRaw) {
+                    this.showError('Please enter KPIs to track.');
+                    return;
+                }
+                this.hideError();
+                // Parse KPIs
+                const kpis = kpisRaw.split(/,|\n/).map(k => k.trim()).filter(Boolean);
+                // Build CSV header
+                let csv = '';
+                if (teamName) csv += `Team/Rep Name: ${teamName}\n`;
+                csv += `Tracking Period: ${trackingPeriod.charAt(0).toUpperCase() + trackingPeriod.slice(1)}\n\n`;
+                csv += 'Date,' + kpis.join(',') + '\n';
+                // Add sample rows
+                for (let i = 0; i < 5; i++) {
+                    csv += ','.repeat(kpis.length + 1) + '\n';
+                }
+                this.csvContent = csv;
+                // Show preview
+                let html = `<b>CSV Columns:</b> Date, ${kpis.join(', ')}`;
+                if (teamName) html += `<br><b>Team/Rep Name:</b> ${teamName}`;
+                html += `<br><b>Tracking Period:</b> ${trackingPeriod.charAt(0).toUpperCase() + trackingPeriod.slice(1)}`;
+                this.resultsDiv.innerHTML = html;
+                this.downloadBtn.style.display = 'inline-block';
+                // Instructions
+                let instructions = `
+                    <b>How to use:</b><br>
+                    1. Download the CSV and open in Excel, Google Sheets, or Notion.<br>
+                    2. For each ${trackingPeriod}, fill in the values for each KPI.<br>
+                    3. Add/remove KPIs as needed for your team.<br>
+                `;
+                this.instructionsDiv.innerHTML = instructions;
+                this.instructionsDiv.style.display = 'block';
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            downloadCsv() {
+                const blob = new Blob([this.csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sales_kpi_dashboard_template.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div class='error-message show'>${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+            hideError() {
+                this.resultsDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new SalesKpiDashboardTemplate();
+        });
+    </script>
+</body>
+</html> 

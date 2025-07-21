@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Pipeline Stage Duration Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .pipeline-duration-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 40px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\23F3";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .bottleneck {
+            color: #ff5252;
+            font-weight: bold;
+        }
+        .suggestions {
+            margin-top: 18px;
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 1em;
+        }
+        #stageChart { max-width: 100%; background: #fff; border-radius: 10px; margin-top: 20px; }
+        @media (max-width: 768px) {
+            .pipeline-duration-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="pipeline-duration-container">
+        <div class="header">
+            <h1>⏳ Sales Pipeline Stage Duration Calculator</h1>
+            <p>Find bottlenecks and improve your sales pipeline flow.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="stages">🔗 Pipeline Stages</label>
+            <textarea id="stages" class="input-textarea" placeholder="E.g., Prospecting, Qualification, Demo, Proposal, Closing"></textarea>
+            <label class="input-label" for="deals">📊 Number of Deals per Stage</label>
+            <textarea id="deals" class="input-textarea" placeholder="E.g., 20, 15, 10, 8, 5"></textarea>
+            <label class="input-label" for="days">📅 Average Days in Each Stage</label>
+            <textarea id="days" class="input-textarea" placeholder="E.g., 5, 7, 10, 4, 2"></textarea>
+        </div>
+        <button id="calcPipelineBtn" class="generate-btn">
+            <span id="pipelineButtonText">🧮 Calculate Durations</span>
+        </button>
+        <div class="result-section" id="pipelineResultSection">
+            <div class="result-header">Stage Durations</div>
+            <div id="pipelineResults"></div>
+            <canvas id="stageChart" height="180"></canvas>
+            <div class="suggestions" id="pipelineSuggestions" style="display:none;"></div>
+        </div>
+    </div>
+    <script>
+        class PipelineStageDurationCalculator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.chart = null;
+            }
+            initializeElements() {
+                this.stagesInput = document.getElementById('stages');
+                this.dealsInput = document.getElementById('deals');
+                this.daysInput = document.getElementById('days');
+                this.calcBtn = document.getElementById('calcPipelineBtn');
+                this.buttonText = document.getElementById('pipelineButtonText');
+                this.resultSection = document.getElementById('pipelineResultSection');
+                this.resultsDiv = document.getElementById('pipelineResults');
+                this.chartCanvas = document.getElementById('stageChart');
+                this.suggestionsDiv = document.getElementById('pipelineSuggestions');
+            }
+            bindEvents() {
+                this.calcBtn.addEventListener('click', () => this.calculateDurations());
+            }
+            calculateDurations() {
+                const stages = this.stagesInput.value.split(/,|\n/).map(s => s.trim()).filter(Boolean);
+                const deals = this.dealsInput.value.split(/,|\n/).map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+                const days = this.daysInput.value.split(/,|\n/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+                if (stages.length === 0 || deals.length !== stages.length || days.length !== stages.length) {
+                    this.showError('Please enter the same number of stages, deals, and days.');
+                    return;
+                }
+                this.hideError();
+                // Find bottleneck (stage with max avg days)
+                const maxDays = Math.max(...days);
+                const bottleneckIdx = days.indexOf(maxDays);
+                // Results table
+                let html = '<table style="width:100%;background:#fff;color:#333;border-radius:8px;overflow:hidden;"><tr><th>Stage</th><th>Deals</th><th>Avg Days</th></tr>';
+                stages.forEach((stage, i) => {
+                    html += `<tr${i === bottleneckIdx ? ' class="bottleneck"' : ''}><td>${stage}</td><td>${deals[i]}</td><td${i === bottleneckIdx ? ' class="bottleneck"' : ''}>${days[i]}</td></tr>`;
+                });
+                html += '</table>';
+                html += `<div style='margin-top:10px;'><b>Bottleneck:</b> <span class='bottleneck'>${stages[bottleneckIdx]}</span> (${days[bottleneckIdx]} days)</div>`;
+                this.resultsDiv.innerHTML = html;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                this.renderChart(stages, days, bottleneckIdx);
+                this.suggestImprovements(stages, days, bottleneckIdx);
+            }
+            renderChart(stages, days, bottleneckIdx) {
+                if (this.chart) this.chart.destroy();
+                this.chart = new Chart(this.chartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: stages,
+                        datasets: [{
+                            label: 'Avg Days in Stage',
+                            data: days,
+                            backgroundColor: days.map((d, i) => i === bottleneckIdx ? '#ff5252' : '#667eea')
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Stage' } },
+                            y: { title: { display: true, text: 'Avg Days' }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+            suggestImprovements(stages, days, bottleneckIdx) {
+                let suggestions = '';
+                if (days[bottleneckIdx] > 7) {
+                    suggestions += `🔹 <b>${stages[bottleneckIdx]}</b> is a bottleneck. Try to automate tasks, set deadlines, or provide more training for this stage.<br>`;
+                } else {
+                    suggestions += '✅ No major bottlenecks detected. Keep monitoring your pipeline!';
+                }
+                this.suggestionsDiv.innerHTML = suggestions;
+                this.suggestionsDiv.style.display = 'block';
+            }
+            showError(message) {
+                this.resultsDiv.innerHTML = `<div class='error-message show'>${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+            hideError() {
+                this.resultsDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new PipelineStageDurationCalculator();
+        });
+    </script>
+</body>
+</html> 
