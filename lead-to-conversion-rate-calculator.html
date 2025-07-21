@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead to Conversion Rate Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .conversion-rate-calculator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4CA";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        #funnelChart { max-width: 100%; background: #fff; border-radius: 10px; margin-top: 20px; }
+        @media (max-width: 768px) {
+            .conversion-rate-calculator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="conversion-rate-calculator-container">
+        <div class="header">
+            <h1>📊 Lead to Conversion Rate Calculator</h1>
+            <p>See your funnel conversion rates and get tips to improve.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="numLeads">👥 Number of Leads</label>
+            <input id="numLeads" class="input-field" type="number" min="1" placeholder="E.g., 100" />
+            <label class="input-label" for="numMeetings">📅 Number of Meetings Booked</label>
+            <input id="numMeetings" class="input-field" type="number" min="0" placeholder="E.g., 20" />
+            <label class="input-label" for="numConversions">🏆 Number of Conversions (Customers)</label>
+            <input id="numConversions" class="input-field" type="number" min="0" placeholder="E.g., 5" />
+        </div>
+        <button id="calcConvBtn" class="generate-btn">
+            <span id="convButtonText">🧮 Calculate Conversion Rate</span>
+        </button>
+        <div class="error-message" id="convErrorMessage"></div>
+        <div class="result-section" id="convResultSection">
+            <div class="result-header">Funnel Results</div>
+            <div id="convResults"></div>
+            <canvas id="funnelChart" height="180"></canvas>
+        </div>
+    </div>
+    <script>
+        class LeadToConversionRateCalculator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.chart = null;
+            }
+            initializeElements() {
+                this.numLeadsInput = document.getElementById('numLeads');
+                this.numMeetingsInput = document.getElementById('numMeetings');
+                this.numConversionsInput = document.getElementById('numConversions');
+                this.calcBtn = document.getElementById('calcConvBtn');
+                this.buttonText = document.getElementById('convButtonText');
+                this.resultSection = document.getElementById('convResultSection');
+                this.errorMessage = document.getElementById('convErrorMessage');
+                this.resultsDiv = document.getElementById('convResults');
+                this.chartCanvas = document.getElementById('funnelChart');
+            }
+            bindEvents() {
+                this.calcBtn.addEventListener('click', () => this.calculateConversion());
+            }
+            calculateConversion() {
+                const numLeads = parseInt(this.numLeadsInput.value, 10);
+                const numMeetings = parseInt(this.numMeetingsInput.value, 10);
+                const numConversions = parseInt(this.numConversionsInput.value, 10);
+                if (!numLeads || numLeads <= 0) {
+                    this.showError('Please enter a valid number of leads.');
+                    return;
+                }
+                if (isNaN(numMeetings) || numMeetings < 0) {
+                    this.showError('Please enter a valid number of meetings.');
+                    return;
+                }
+                if (isNaN(numConversions) || numConversions < 0) {
+                    this.showError('Please enter a valid number of conversions.');
+                    return;
+                }
+                if (numMeetings > numLeads) {
+                    this.showError('Meetings booked cannot exceed number of leads.');
+                    return;
+                }
+                if (numConversions > numMeetings) {
+                    this.showError('Conversions cannot exceed meetings booked.');
+                    return;
+                }
+                this.hideError();
+                // Calculations
+                const meetingRate = (numMeetings / numLeads) * 100;
+                const conversionRate = numMeetings === 0 ? 0 : (numConversions / numMeetings) * 100;
+                const leadToCloseRate = (numConversions / numLeads) * 100;
+                // Results
+                this.resultsDiv.innerHTML = `
+                    <b>Lead → Meeting Rate:</b> ${meetingRate.toFixed(1)}%<br>
+                    <b>Meeting → Conversion Rate:</b> ${conversionRate.toFixed(1)}%<br>
+                    <b>Lead → Close Rate:</b> ${leadToCloseRate.toFixed(1)}%<br>
+                `;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                this.renderChart(numLeads, numMeetings, numConversions);
+                this.suggestImprovements(meetingRate, conversionRate);
+            }
+            renderChart(numLeads, numMeetings, numConversions) {
+                if (this.chart) this.chart.destroy();
+                this.chart = new Chart(this.chartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Leads', 'Meetings', 'Conversions'],
+                        datasets: [{
+                            label: 'Funnel',
+                            data: [numLeads, numMeetings, numConversions],
+                            backgroundColor: [
+                                'rgba(102,126,234,0.7)',
+                                'rgba(118,75,162,0.7)',
+                                'rgba(255,107,107,0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Funnel Stage' } },
+                            y: { title: { display: true, text: 'Count' }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+            suggestImprovements(meetingRate, conversionRate) {
+                let suggestions = '';
+                if (meetingRate < 20) {
+                    suggestions += '🔹 Try improving your outreach messaging or targeting to book more meetings.<br>';
+                }
+                if (conversionRate < 20) {
+                    suggestions += '🔹 Focus on better qualification or demo skills to improve conversion from meetings.<br>';
+                }
+                if (!suggestions) {
+                    suggestions = '✅ Your funnel looks healthy!';
+                }
+                this.resultsDiv.innerHTML += `<div style='margin-top:12px;'><b>Suggestions:</b><br>${suggestions}</div>`;
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new LeadToConversionRateCalculator();
+        });
+    </script>
+</body>
+</html> 

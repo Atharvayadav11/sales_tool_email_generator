@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Script Builder</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .sales-script-builder-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading-spinner {
+            display: none;
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4DD";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .script-section {
+            margin-bottom: 18px;
+        }
+        .script-section b {
+            color: #764ba2;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        @media (max-width: 768px) {
+            .sales-script-builder-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sales-script-builder-container">
+        <div class="header">
+            <h1>📝 Sales Script Builder</h1>
+            <p>Build a complete, personalized sales script from opener to close.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="productInfo">🛠️ Product Info</label>
+            <textarea id="productInfo" class="input-textarea" placeholder="Describe your product or service..."></textarea>
+            <label class="input-label" for="targetPersona">🧑‍💼 Target Persona</label>
+            <input id="targetPersona" class="input-field" placeholder="E.g., SMB founder, Sales Manager" />
+            <label class="input-label" for="callType">📞 Call Type</label>
+            <select id="callType" class="input-select">
+                <option value="cold">Cold Call</option>
+                <option value="demo">Demo Call</option>
+                <option value="follow-up">Follow-up Call</option>
+            </select>
+        </div>
+        <button id="generateScriptBtn" class="generate-btn">
+            <div class="loading-spinner" id="scriptLoadingSpinner"></div>
+            <span id="scriptButtonText">🚀 Generate Sales Script</span>
+        </button>
+        <div class="error-message" id="scriptErrorMessage"></div>
+        <div class="result-section" id="scriptResultSection">
+            <div class="result-header">Sales Script</div>
+            <div id="scriptResultBlocks"></div>
+        </div>
+    </div>
+    <script>
+        class SalesScriptBuilder {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/generate-sales-script';
+                this.initializeElements();
+                this.bindEvents();
+            }
+            initializeElements() {
+                this.productInfoInput = document.getElementById('productInfo');
+                this.targetPersonaInput = document.getElementById('targetPersona');
+                this.callTypeInput = document.getElementById('callType');
+                this.generateBtn = document.getElementById('generateScriptBtn');
+                this.loadingSpinner = document.getElementById('scriptLoadingSpinner');
+                this.buttonText = document.getElementById('scriptButtonText');
+                this.resultSection = document.getElementById('scriptResultSection');
+                this.errorMessage = document.getElementById('scriptErrorMessage');
+                this.resultBlocksDiv = document.getElementById('scriptResultBlocks');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateScript());
+                this.productInfoInput.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        this.generateScript();
+                    }
+                });
+            }
+            async generateScript() {
+                const productInfo = this.productInfoInput.value.trim();
+                const targetPersona = this.targetPersonaInput.value.trim();
+                const callType = this.callTypeInput.value;
+                if (!productInfo) {
+                    this.showError('Please enter product info.');
+                    return;
+                }
+                if (!targetPersona) {
+                    this.showError('Please enter the target persona.');
+                    return;
+                }
+                if (!callType) {
+                    this.showError('Please select the call type.');
+                    return;
+                }
+                this.setLoadingState(true);
+                this.hideError();
+                this.hideResult();
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productInfo, targetPersona, callType })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (!data.script || typeof data.script !== 'object') {
+                        throw new Error('Invalid response format from server.');
+                    }
+                    this.displayResult(data.script);
+                } catch (error) {
+                    this.showError(`Failed to generate: ${error.message}`);
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+            setLoadingState(isLoading) {
+                if (isLoading) {
+                    this.generateBtn.disabled = true;
+                    this.loadingSpinner.style.display = 'inline-block';
+                    this.buttonText.textContent = 'Generating...';
+                } else {
+                    this.generateBtn.disabled = false;
+                    this.loadingSpinner.style.display = 'none';
+                    this.buttonText.textContent = '🚀 Generate Sales Script';
+                }
+            }
+            displayResult(script) {
+                this.resultBlocksDiv.innerHTML = `
+                    <div class='script-section'><b>Opener:</b><br>${script.opener || ''}</div>
+                    <div class='script-section'><b>Problem:</b><br>${script.problem || ''}</div>
+                    <div class='script-section'><b>Solution:</b><br>${script.solution || ''}</div>
+                    <div class='script-section'><b>Call to Action (CTA):</b><br>${script.cta || ''}</div>
+                    <div class='script-section'><b>Personalization Hooks:</b><br>${Array.isArray(script.personalizationHooks) ? script.personalizationHooks.map(h => `- ${h}`).join('<br>') : ''}</div>
+                    <div class='script-section'><b>Objection Handling Inserts (optional):</b><br>${Array.isArray(script.objectionHandling) ? script.objectionHandling.map(o => `- ${o}`).join('<br>') : ''}</div>
+                `;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            hideResult() {
+                this.resultSection.classList.remove('show');
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new SalesScriptBuilder();
+        });
+    </script>
+</body>
+</html> 

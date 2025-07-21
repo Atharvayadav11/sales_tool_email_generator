@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Scoring Template Generator</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .scoring-template-generator-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field, .input-textarea, .input-select {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus, .input-textarea:focus, .input-select:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .input-textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F4C8";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .download-btn {
+            margin-top: 18px;
+            padding: 12px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .download-btn:hover { background: #5a6fd8; }
+        .instructions {
+            margin-top: 18px;
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 1em;
+        }
+        @media (max-width: 768px) {
+            .scoring-template-generator-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="scoring-template-generator-container">
+        <div class="header">
+            <h1>📈 Lead Scoring Template Generator</h1>
+            <p>Generate a lead scoring system template for your sales team.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="productType">🛠️ Product Type</label>
+            <input id="productType" class="input-field" placeholder="E.g., CRM, SaaS, HR tech" />
+            <label class="input-label" for="salesStrategy">🎯 Sales Strategy</label>
+            <select id="salesStrategy" class="input-select">
+                <option value="bant">BANT</option>
+                <option value="champ">CHAMP</option>
+                <option value="inbound">Inbound</option>
+                <option value="outbound">Outbound</option>
+                <option value="custom">Custom</option>
+            </select>
+            <label class="input-label" for="leadAttributes">🔑 Key Lead Attributes</label>
+            <textarea id="leadAttributes" class="input-textarea" placeholder="E.g., Budget, Industry, Company Size, Decision Maker, Urgency"></textarea>
+        </div>
+        <button id="generateTemplateBtn" class="generate-btn">
+            <span id="templateButtonText">🧮 Generate Template</span>
+        </button>
+        <div class="result-section" id="templateResultSection">
+            <div class="result-header">Lead Scoring Formula & Template</div>
+            <div id="templateFormula"></div>
+            <button id="downloadTemplateBtn" class="download-btn" style="display:none;">⬇️ Download CSV Template</button>
+            <div class="instructions" id="templateInstructions" style="display:none;"></div>
+        </div>
+    </div>
+    <script>
+        class LeadScoringTemplateGenerator {
+            constructor() {
+                this.initializeElements();
+                this.bindEvents();
+                this.csvContent = '';
+            }
+            initializeElements() {
+                this.productTypeInput = document.getElementById('productType');
+                this.salesStrategyInput = document.getElementById('salesStrategy');
+                this.leadAttributesInput = document.getElementById('leadAttributes');
+                this.generateBtn = document.getElementById('generateTemplateBtn');
+                this.buttonText = document.getElementById('templateButtonText');
+                this.resultSection = document.getElementById('templateResultSection');
+                this.formulaDiv = document.getElementById('templateFormula');
+                this.downloadBtn = document.getElementById('downloadTemplateBtn');
+                this.instructionsDiv = document.getElementById('templateInstructions');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generateTemplate());
+                this.downloadBtn.addEventListener('click', () => this.downloadCsv());
+            }
+            generateTemplate() {
+                const productType = this.productTypeInput.value.trim();
+                const salesStrategy = this.salesStrategyInput.value;
+                const attributesRaw = this.leadAttributesInput.value.trim();
+                if (!productType) {
+                    this.showError('Please enter a product type.');
+                    return;
+                }
+                if (!attributesRaw) {
+                    this.showError('Please enter key lead attributes.');
+                    return;
+                }
+                this.hideError();
+                // Parse attributes
+                const attributes = attributesRaw.split(/,|\n/).map(a => a.trim()).filter(Boolean);
+                // Assign points (simple: 10 points each, can be customized)
+                const points = Math.floor(100 / attributes.length);
+                let formulaHtml = '<b>Lead Scoring Formula:</b><br><ul>';
+                attributes.forEach(attr => {
+                    formulaHtml += `<li>${attr}: <b>${points} pts</b></li>`;
+                });
+                formulaHtml += '</ul>';
+                this.formulaDiv.innerHTML = formulaHtml;
+                // CSV content
+                let csv = 'Lead Name,' + attributes.join(',') + ',Total Score\n';
+                csv += 'Sample Lead,' + attributes.map(() => '').join(',') + ',\n';
+                this.csvContent = csv;
+                this.downloadBtn.style.display = 'inline-block';
+                // Instructions
+                let instructions = `
+                    <b>How to use:</b><br>
+                    1. Download the CSV and open in Excel, Google Sheets, or Notion.<br>
+                    2. For each lead, fill in the attribute values (e.g., Yes/No, High/Medium/Low, or a score).<br>
+                    3. Add up the points for each attribute to get the total lead score.<br>
+                    4. Adjust the points or add/remove attributes as needed for your process.<br>
+                    <br>
+                    <b>Model:</b> ${salesStrategy.toUpperCase()}<br>
+                    <b>Product Type:</b> ${productType}<br>
+                `;
+                this.instructionsDiv.innerHTML = instructions;
+                this.instructionsDiv.style.display = 'block';
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            downloadCsv() {
+                const blob = new Blob([this.csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'lead_scoring_template.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            showError(message) {
+                this.formulaDiv.innerHTML = `<div class='error-message show'>${message}</div>`;
+                this.resultSection.classList.add('show');
+            }
+            hideError() {
+                this.formulaDiv.innerHTML = '';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new LeadScoringTemplateGenerator();
+        });
+    </script>
+</body>
+</html> 

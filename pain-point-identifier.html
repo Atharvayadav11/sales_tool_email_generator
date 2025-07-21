@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pain Point Identifier</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        .pain-point-identifier-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #f0f8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .input-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-label {
+            display: block;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #f8f9fa;
+        }
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-field:focus {
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+        .generate-btn {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading-spinner {
+            display: none;
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            color: #333;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+        }
+        .result-header::before {
+            content: "\1F494";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .error-message {
+            background: rgba(255, 82, 82, 0.1);
+            color: #ff5252;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff5252;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .error-message.show { display: block; }
+        @media (max-width: 768px) {
+            .pain-point-identifier-container { margin: 10px; padding: 20px; }
+            .header h1 { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="pain-point-identifier-container">
+        <div class="header">
+            <h1>💔 Pain Point Identifier</h1>
+            <p>Discover your audience’s real struggles and use-case narratives for your product.</p>
+        </div>
+        <div class="input-section">
+            <label class="input-label" for="productType">🛠️ Product Type</label>
+            <input id="productType" class="input-field" placeholder="E.g., CRM, HR tech, Analytics platform" />
+            <label class="input-label" for="targetAudience">🎯 Target Audience</label>
+            <input id="targetAudience" class="input-field" placeholder="E.g., SMB founders, Sales Managers" />
+        </div>
+        <button id="generatePainPointsBtn" class="generate-btn">
+            <div class="loading-spinner" id="painLoadingSpinner"></div>
+            <span id="painButtonText">🔎 Identify Pain Points</span>
+        </button>
+        <div class="error-message" id="painErrorMessage"></div>
+        <div class="result-section" id="painResultSection">
+            <div class="result-header">Top Pain Points</div>
+            <div id="painPointsList"></div>
+        </div>
+    </div>
+    <script>
+        class PainPointIdentifier {
+            constructor() {
+                this.apiUrl = 'https://sales-tool-email-generator.onrender.com/identify-pain-points';
+                this.initializeElements();
+                this.bindEvents();
+            }
+            initializeElements() {
+                this.productTypeInput = document.getElementById('productType');
+                this.targetAudienceInput = document.getElementById('targetAudience');
+                this.generateBtn = document.getElementById('generatePainPointsBtn');
+                this.loadingSpinner = document.getElementById('painLoadingSpinner');
+                this.buttonText = document.getElementById('painButtonText');
+                this.resultSection = document.getElementById('painResultSection');
+                this.errorMessage = document.getElementById('painErrorMessage');
+                this.painPointsListDiv = document.getElementById('painPointsList');
+            }
+            bindEvents() {
+                this.generateBtn.addEventListener('click', () => this.generatePainPoints());
+                this.productTypeInput.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        this.generatePainPoints();
+                    }
+                });
+            }
+            async generatePainPoints() {
+                const productType = this.productTypeInput.value.trim();
+                const targetAudience = this.targetAudienceInput.value.trim();
+                if (!productType) {
+                    this.showError('Please enter the product type.');
+                    return;
+                }
+                if (!targetAudience) {
+                    this.showError('Please enter the target audience.');
+                    return;
+                }
+                this.setLoadingState(true);
+                this.hideError();
+                this.hideResult();
+                try {
+                    const response = await fetch(this.apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productType, targetAudience })
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (!data.painPoints || !Array.isArray(data.painPoints)) {
+                        throw new Error('Invalid response format from server.');
+                    }
+                    this.displayResult(data);
+                } catch (error) {
+                    this.showError(`Failed to identify: ${error.message}`);
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+            setLoadingState(isLoading) {
+                if (isLoading) {
+                    this.generateBtn.disabled = true;
+                    this.loadingSpinner.style.display = 'inline-block';
+                    this.buttonText.textContent = 'Identifying...';
+                } else {
+                    this.generateBtn.disabled = false;
+                    this.loadingSpinner.style.display = 'none';
+                    this.buttonText.textContent = '🔎 Identify Pain Points';
+                }
+            }
+            displayResult(data) {
+                this.painPointsListDiv.innerHTML = `<ul style='margin:8px 0 0 18px;'>${data.painPoints.map(p => `
+                    <li style='margin-bottom:12px;'>
+                        <b>${p.title}</b> <span style='color:${p.type === 'emotional' ? '#ff5252' : '#667eea'};'>(${p.type.charAt(0).toUpperCase() + p.type.slice(1)})</span><br>
+                        <span style='font-size:0.98em;'>${p.narrative}</span>
+                    </li>
+                `).join('')}</ul>`;
+                this.resultSection.classList.add('show');
+                this.resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            hideResult() {
+                this.resultSection.classList.remove('show');
+            }
+            showError(message) {
+                this.errorMessage.textContent = message;
+                this.errorMessage.classList.add('show');
+            }
+            hideError() {
+                this.errorMessage.classList.remove('show');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            new PainPointIdentifier();
+        });
+    </script>
+</body>
+</html> 
